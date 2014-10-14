@@ -10,7 +10,7 @@ DEVICE  = attiny85
 F_CPU   = 16500000	# in Hz
 FUSE_L  = # see below for fuse values for particular devices
 FUSE_H  = 
-AVRDUDE = avrdude -c usbasp -p $(DEVICE) # edit this line for your programmer
+AVRDUDE = micronucleus main.hex
 
 CFLAGS  = -Iusbdrv -I. -DDEBUG_LEVEL=0
 OBJECTS = usbdrv/usbdrv.o usbdrv/usbdrvasm.o main.o usbRelated.o bitbang_i2c.o
@@ -118,7 +118,7 @@ fuse:
 
 # rule for uploading firmware:
 flash: main.hex
-	$(AVRDUDE) -U flash:w:main.hex:i
+	$(AVRDUDE)
 
 # rule for deleting dependent files (those which can be built by Make):
 clean:

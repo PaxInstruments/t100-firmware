@@ -31,7 +31,7 @@ int usbDescriptorStringSerialNumber[] = {
 /*---------------------------------------------------------------------------*/
 void handleMessage()
 {
-    switch(msgbuf[0])
+    switch(msgbuf[1])
     {
         case 0: /* Version reading */
         {                        
