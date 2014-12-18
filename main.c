@@ -14,7 +14,7 @@
 #include "usbRelated.h"
 #include "bitbang_i2c.h"
 /*---------------------------------------------------------------------------*/
-#define VERSION 0x01
+#define VERSION 0x02
 /*---------------------------------------------------------------------------*/
 void timer_init();
 void initSerialNumber();
@@ -48,8 +48,6 @@ void handleMessage()
             msgbuf[4] = thermocoupleReadout[3];  
             msgbuf[5] = coldJunctionReadout[0];
             msgbuf[6] = coldJunctionReadout[1];
-            msgbuf[7] = coldJunctionReadout[2];
-            msgbuf[8] = coldJunctionReadout[3];              
             break;
         }
         case 2: /* GPIO control */
@@ -88,72 +86,46 @@ int main(void)
     timer_init();
 
     pinMode(B,1,OUTPUT);
+
+    /* Set MCP9800 to 12 bit resolution */
+    I2C_Start();
+    I2C_Write(write_address(0x4D));
+    I2C_Write(0x01);
+    I2C_Write((1<<7)|(1<<6)|(1<<5));
+    I2C_Stop();
+
+    /* Set MCP9800 Register Pointer to Ambient Temperature */
+    I2C_Start();
+    I2C_Write(write_address(0x4D));
+    I2C_Write(0x00);
+    I2C_Stop();
     
     while(1)
-    {    
+    {        
         /*-------------------------------------------------------------------*/
-        /* CH1: Thermocouple channel */
-        /* 18 bit resolution with 8x PGA gain */
+        /* MCP9800: Cold junction channel */
         /*-------------------------------------------------------------------*/
         usbPoll();
         I2C_Start();
-        I2C_Write(write_address(0x68));
-        I2C_Write((1<<7)|(1<<3)|(1<<2)|(1<<1)|(1<<0));
-        I2C_Stop();
-        
-        timer0_counter = 250;
-        while(timer0_counter)
-        {
-            usbPoll();            
-        }
-
-        I2C_Start();
-        I2C_Write(read_address(0x68));
+        I2C_Write(read_address(0x4D));
         tmpReadout[0] = I2C_Read(ACK);
-        tmpReadout[1] = I2C_Read(ACK);
-        tmpReadout[2] = I2C_Read(ACK);
-        tmpReadout[3] = I2C_Read(NO_ACK);
-        I2C_Stop();
-
-        usbPoll();
-        cli();
-            thermocoupleReadout[0] = tmpReadout[0];            
-            thermocoupleReadout[1] = tmpReadout[1];
-            thermocoupleReadout[2] = tmpReadout[2];
-            thermocoupleReadout[3] = tmpReadout[3];
-        sei();
-
-        /*-------------------------------------------------------------------*/
-        /* CH2: Cold junction channel */
-        /* 18 bit resolution with 1x PGA gain */
-        /*-------------------------------------------------------------------*/
-        usbPoll();
-        I2C_Start();
-        I2C_Write(write_address(0x68));
-        I2C_Write((1<<7)|(1<<5)|(1<<3)|(1<<2));
-        I2C_Stop();
-        
-        timer0_counter = 250;
-        while(timer0_counter)
-        {
-            usbPoll();            
-        }
-
-        I2C_Start();
-        I2C_Write(read_address(0x68));
-        tmpReadout[0] = I2C_Read(ACK);
-        tmpReadout[1] = I2C_Read(ACK);
-        tmpReadout[2] = I2C_Read(ACK);
-        tmpReadout[3] = I2C_Read(NO_ACK);
+        tmpReadout[1] = I2C_Read(NO_ACK);
         I2C_Stop();
 
         usbPoll();
         cli();
             coldJunctionReadout[0] = tmpReadout[0];            
-            coldJunctionReadout[1] = tmpReadout[1];
-            coldJunctionReadout[2] = tmpReadout[2];   
-            coldJunctionReadout[3] = tmpReadout[3];            
+            coldJunctionReadout[1] = tmpReadout[1];        
         sei();
+
+        /*-------------------------------------------------------------------*/
+        /* Small delay ...
+        /*-------------------------------------------------------------------*/
+        timer0_counter = 250;
+        while(timer0_counter)
+        {
+            usbPoll();            
+        }
     }
 
     return 0;
