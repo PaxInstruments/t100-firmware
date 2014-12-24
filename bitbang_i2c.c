@@ -14,7 +14,7 @@
 #define I2C_CLK 2
 #define I2C_DAT 0
 
-#define I2C_DELAY() _delay_us(5)
+#define I2C_DELAY() _delay_us(25)
 
 #define I2C_DATA_HI() I2C_DDR &= ~( 1 << I2C_DAT );
 #define I2C_DATA_LO() I2C_DDR |= ( 1 << I2C_DAT );

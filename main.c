@@ -19,6 +19,8 @@
 void timer_init();
 void initSerialNumber();
 /*---------------------------------------------------------------------------*/
+uint8_t debug[3];
+volatile uint8_t gainSetting;
 uint8_t thermocoupleReadout[4]; 
 uint8_t coldJunctionReadout[4];
 uint8_t* EE_addr = (uint8_t*)32;
@@ -44,10 +46,13 @@ void handleMessage()
         {            
             msgbuf[1] = thermocoupleReadout[0];
             msgbuf[2] = thermocoupleReadout[1];
-            msgbuf[3] = thermocoupleReadout[2];
-            msgbuf[4] = thermocoupleReadout[3];  
+            msgbuf[3] = thermocoupleReadout[2];    
+            msgbuf[4] = thermocoupleReadout[3];            
             msgbuf[5] = coldJunctionReadout[0];
             msgbuf[6] = coldJunctionReadout[1];
+            msgbuf[7] = debug[0];
+            msgbuf[8] = debug[1];
+            msgbuf[9] = debug[2];
             break;
         }
         case 2: /* GPIO control */
@@ -67,6 +72,12 @@ void handleMessage()
             eeprom_write_byte((EE_addr+0),msgbuf[2]);
             eeprom_write_byte((EE_addr+1),msgbuf[3]);
             eeprom_write_byte((EE_addr+2),msgbuf[4]);
+            break;
+        }
+        case 4: /* Change PGA setting for MCP3421 */
+        {
+            gainSetting = msgbuf[2];
+            break;
         }
         default:
         {
@@ -80,6 +91,9 @@ int main(void)
 {    
     uint8_t tmpReadout[4];
 
+    gainSetting = 0;
+    timer0_counter = 0;
+
     initSerialNumber();
     usb_init();  
     I2C_Init();  
@@ -87,14 +101,18 @@ int main(void)
 
     pinMode(B,1,OUTPUT);
 
+    /*-----------------------------------------------------------------------*/
     /* Set MCP9800 to 12 bit resolution */
+    /*-----------------------------------------------------------------------*/
     I2C_Start();
     I2C_Write(write_address(0x4D));
     I2C_Write(0x01);
     I2C_Write((1<<7)|(1<<6)|(1<<5));
     I2C_Stop();
 
+    /*-----------------------------------------------------------------------*/
     /* Set MCP9800 Register Pointer to Ambient Temperature */
+    /*-----------------------------------------------------------------------*/
     I2C_Start();
     I2C_Write(write_address(0x4D));
     I2C_Write(0x00);
@@ -107,7 +125,7 @@ int main(void)
         /*-------------------------------------------------------------------*/
         usbPoll();
         I2C_Start();
-        I2C_Write(read_address(0x4D));
+        debug[0] = I2C_Write(read_address(0x4D));
         tmpReadout[0] = I2C_Read(ACK);
         tmpReadout[1] = I2C_Read(NO_ACK);
         I2C_Stop();
@@ -119,6 +137,15 @@ int main(void)
         sei();
 
         /*-------------------------------------------------------------------*/
+        /* MCP3421
+        /*-------------------------------------------------------------------*/
+        usbPoll();
+        I2C_Start();
+        I2C_Write(write_address(0x6A));
+        I2C_Write((1<<7)|(1<<5)|(1<<3)|(1<<2));
+        I2C_Stop();
+
+        /*-------------------------------------------------------------------*/
         /* Small delay ...
         /*-------------------------------------------------------------------*/
         timer0_counter = 250;
@@ -126,6 +153,26 @@ int main(void)
         {
             usbPoll();            
         }
+
+        /*-------------------------------------------------------------------*/
+        /* MCP3421
+        /*-------------------------------------------------------------------*/
+        usbPoll();
+        I2C_Start();
+        I2C_Write(read_address(0x6A));
+        tmpReadout[0] = I2C_Read(ACK);
+        tmpReadout[1] = I2C_Read(ACK);
+        tmpReadout[2] = I2C_Read(ACK);
+        tmpReadout[3] = I2C_Read(NO_ACK);
+        I2C_Stop();
+
+        usbPoll();
+        cli();
+            thermocoupleReadout[0] = tmpReadout[0];
+            thermocoupleReadout[1] = tmpReadout[1];
+            thermocoupleReadout[2] = tmpReadout[2];
+            thermocoupleReadout[3] = tmpReadout[3];
+        sei();
     }
 
     return 0;
