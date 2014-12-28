@@ -37,22 +37,22 @@ void handleMessage()
     {
         case 0: /* Version reading */
         {                        
-            msgbuf[1] = 0xAA;            
-            msgbuf[2] = 0x55;
-            msgbuf[3] = VERSION;            
+            msgbuf[2] = 0xBB;            
+            msgbuf[3] = 0x66;
+            msgbuf[4] = VERSION;            
             break;
         }
         case 1: /* ADC reading */
         {            
-            msgbuf[1] = thermocoupleReadout[0];
-            msgbuf[2] = thermocoupleReadout[1];
-            msgbuf[3] = thermocoupleReadout[2];    
-            msgbuf[4] = thermocoupleReadout[3];            
-            msgbuf[5] = coldJunctionReadout[0];
-            msgbuf[6] = coldJunctionReadout[1];
-            msgbuf[7] = debug[0];
-            msgbuf[8] = debug[1];
-            msgbuf[9] = debug[2];
+            msgbuf[2] = thermocoupleReadout[0];
+            msgbuf[3] = thermocoupleReadout[1];
+            msgbuf[4] = thermocoupleReadout[2];    
+            msgbuf[5] = thermocoupleReadout[3];            
+            msgbuf[6] = coldJunctionReadout[0];
+            msgbuf[7] = coldJunctionReadout[1];
+            msgbuf[8] = debug[0];
+            msgbuf[9] = debug[1];
+            msgbuf[10] = debug[2];
             break;
         }
         case 2: /* GPIO control */
@@ -119,7 +119,7 @@ int main(void)
     I2C_Stop();
     
     while(1)
-    {        
+    {                
         /*-------------------------------------------------------------------*/
         /* MCP9800: Cold junction channel */
         /*-------------------------------------------------------------------*/
