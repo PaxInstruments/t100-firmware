@@ -14,7 +14,7 @@ F_CPU      = 16500000
 PROGRAMMER = usbtiny
 
 FLASH      = micronucleus main.hex
-BOOTLOADER = avrdude -c $(PROGRAMMER) -p t85 -U flash:w:/bin/micronucleus-1.02.hex -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
+BOOTLOADER = avrdude -c $(PROGRAMMER) -p t85 -U flash:w:bin/micronucleus-1.02.hex -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 FUSE       = avrdude -c $(PROGRAMMER) -p t85 -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 
 CFLAGS  = -Iusbdrv -I. -DDEBUG_LEVEL=0
