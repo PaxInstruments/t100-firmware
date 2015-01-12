@@ -13,7 +13,7 @@ Here are basic instructions.
 ##Bootloader application
 You need to install the commandline utility for micronucleus bootloader.
 
-For __OSX__, go to <https://github.com/micronucleus/micronucleus/tree/master/commandline/builds> link and download the binary. Then, from the terminal hit `sudo cp micronucleus /usr/bin` to copy the application to global binary location.
+For __OSX__, go to <https://github.com/micronucleus/micronucleus/tree/master/commandline/builds> link and download the binary. Then, from the terminal hit `sudo cp micronucleus /usr/bin` to copy the application to global binary location. Change permissions by executing `sudo chmod +rx /usr/bin/micronucleus`.
 
 For __Windows__, again download the binary from the link above and put that binary inside any of the global path folders.
 
