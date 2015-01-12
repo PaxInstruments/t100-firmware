@@ -1,3 +1,4 @@
+#--------------------------------------------------------------------------------------------------
 # Name: Makefile
 # Project: hid-data example
 # Author: Christian Starkjohann
@@ -5,120 +6,50 @@
 # Tabsize: 4
 # Copyright: (c) 2008 by OBJECTIVE DEVELOPMENT Software GmbH
 # License: GNU GPL v2 (see License.txt), GNU GPL v3 or proprietary (CommercialLicense.txt)
+#--------------------------------------------------------------------------------------------------
+# Modified for T100 firmware.
+#--------------------------------------------------------------------------------------------------
+DEVICE     = attiny85
+F_CPU      = 16500000   
+PROGRAMMER = usbtiny
 
-DEVICE  = attiny85
-F_CPU   = 16500000	# in Hz
-FUSE_L  = # see below for fuse values for particular devices
-FUSE_H  = 
-AVRDUDE = micronucleus main.hex
+FLASH      = micronucleus main.hex
+BOOTLOADER = avrdude -c $(PROGRAMMER) -p t85 -U flash:w:/bin/micronucleus-1.02.hex -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
+FUSE       = avrdude -c $(PROGRAMMER) -p t85 -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 
 CFLAGS  = -Iusbdrv -I. -DDEBUG_LEVEL=0
+CFLAGS += -Wno-deprecated-declarations -D__PROG_TYPES_COMPAT__
+CFLAGS += -Wl,--gc-sections
+CFLAGS += -fdata-sections -ffunction-sections
 OBJECTS = usbdrv/usbdrv.o usbdrv/usbdrvasm.o main.o usbRelated.o bitbang_i2c.o
 
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 
-##############################################################################
-# Fuse values for particular devices
-##############################################################################
-# If your device is not listed here, go to
-# http://palmavr.sourceforge.net/cgi-bin/fc.cgi
-# and choose options for external crystal clock and no clock divider
-#
-################################## ATMega8 ##################################
-# ATMega8 FUSE_L (Fuse low byte):
-# 0x9f = 1 0 0 1   1 1 1 1
-#        ^ ^ \ /   \--+--/
-#        | |  |       +------- CKSEL 3..0 (external >8M crystal)
-#        | |  +--------------- SUT 1..0 (crystal osc, BOD enabled)
-#        | +------------------ BODEN (BrownOut Detector enabled)
-#        +-------------------- BODLEVEL (2.7V)
-# ATMega8 FUSE_H (Fuse high byte):
-# 0xc9 = 1 1 0 0   1 0 0 1 <-- BOOTRST (boot reset vector at 0x0000)
-#        ^ ^ ^ ^   ^ ^ ^------ BOOTSZ0
-#        | | | |   | +-------- BOOTSZ1
-#        | | | |   + --------- EESAVE (don't preserve EEPROM over chip erase)
-#        | | | +-------------- CKOPT (full output swing)
-#        | | +---------------- SPIEN (allow serial programming)
-#        | +------------------ WDTON (WDT not always on)
-#        +-------------------- RSTDISBL (reset pin is enabled)
-#
-############################## ATMega48/88/168 ##############################
-# ATMega*8 FUSE_L (Fuse low byte):
-# 0xdf = 1 1 0 1   1 1 1 1
-#        ^ ^ \ /   \--+--/
-#        | |  |       +------- CKSEL 3..0 (external >8M crystal)
-#        | |  +--------------- SUT 1..0 (crystal osc, BOD enabled)
-#        | +------------------ CKOUT (if 0: Clock output enabled)
-#        +-------------------- CKDIV8 (if 0: divide by 8)
-# ATMega*8 FUSE_H (Fuse high byte):
-# 0xde = 1 1 0 1   1 1 1 0
-#        ^ ^ ^ ^   ^ \-+-/
-#        | | | |   |   +------ BODLEVEL 0..2 (110 = 1.8 V)
-#        | | | |   + --------- EESAVE (preserve EEPROM over chip erase)
-#        | | | +-------------- WDTON (if 0: watchdog always on)
-#        | | +---------------- SPIEN (allow serial programming)
-#        | +------------------ DWEN (debug wire enable)
-#        +-------------------- RSTDISBL (reset pin is enabled)
-#
-############################## ATTiny25/45/85 ###############################
-# ATMega*5 FUSE_L (Fuse low byte):
-# 0xef = 1 1 1 0   1 1 1 1
-#        ^ ^ \+/   \--+--/
-#        | |  |       +------- CKSEL 3..0 (clock selection -> crystal @ 12 MHz)
-#        | |  +--------------- SUT 1..0 (BOD enabled, fast rising power)
-#        | +------------------ CKOUT (clock output on CKOUT pin -> disabled)
-#        +-------------------- CKDIV8 (divide clock by 8 -> don't divide)
-# ATMega*5 FUSE_H (Fuse high byte):
-# 0xdd = 1 1 0 1   1 1 0 1
-#        ^ ^ ^ ^   ^ \-+-/ 
-#        | | | |   |   +------ BODLEVEL 2..0 (brownout trigger level -> 2.7V)
-#        | | | |   +---------- EESAVE (preserve EEPROM on Chip Erase -> not preserved)
-#        | | | +-------------- WDTON (watchdog timer always on -> disable)
-#        | | +---------------- SPIEN (enable serial programming -> enabled)
-#        | +------------------ DWEN (debug wire enable)
-#        +-------------------- RSTDISBL (disable external reset -> enabled)
-#
-################################ ATTiny2313 #################################
-# ATTiny2313 FUSE_L (Fuse low byte):
-# 0xef = 1 1 1 0   1 1 1 1
-#        ^ ^ \+/   \--+--/
-#        | |  |       +------- CKSEL 3..0 (clock selection -> crystal @ 12 MHz)
-#        | |  +--------------- SUT 1..0 (BOD enabled, fast rising power)
-#        | +------------------ CKOUT (clock output on CKOUT pin -> disabled)
-#        +-------------------- CKDIV8 (divide clock by 8 -> don't divide)
-# ATTiny2313 FUSE_H (Fuse high byte):
-# 0xdb = 1 1 0 1   1 0 1 1
-#        ^ ^ ^ ^   \-+-/ ^
-#        | | | |     |   +---- RSTDISBL (disable external reset -> enabled)
-#        | | | |     +-------- BODLEVEL 2..0 (brownout trigger level -> 2.7V)
-#        | | | +-------------- WDTON (watchdog timer always on -> disable)
-#        | | +---------------- SPIEN (enable serial programming -> enabled)
-#        | +------------------ EESAVE (preserve EEPROM on Chip Erase -> not preserved)
-#        +-------------------- DWEN (debug wire enable)
-
-
 # symbolic targets:
 help:
 	@echo "This Makefile has no default rule. Use one of the following:"
-	@echo "make hex ....... to build main.hex"
-	@echo "make program ... to flash fuses and firmware"
-	@echo "make fuse ...... to flash the fuses"
-	@echo "make flash ..... to flash the firmware (use this on metaboard)"
-	@echo "make clean ..... to delete objects and hex file"
+	@echo "make hex ......... to build main.hex"
+	@echo "make fuse ........ to flash the fuses"
+	@echo "make flash ....... to flash the firmware using the micronucleus"
+	@echo "make clean ....... to delete objects and hex file"
+	@echo "make bootloader .. to flash the bootloader and fuses"
+	@echo "make iterate ..... [ make clean && make hex && make flash ]"
 
 hex: main.hex
 
-program: flash fuse
-
 # rule for programming fuse bits:
 fuse:
-	@[ "$(FUSE_H)" != "" -a "$(FUSE_L)" != "" ] || \
-		{ echo "*** Edit Makefile and choose values for FUSE_L and FUSE_H!"; exit 1; }
-	$(AVRDUDE) -U hfuse:w:$(FUSE_H):m -U lfuse:w:$(FUSE_L):m
+	$(FUSE)
 
 # rule for uploading firmware:
-flash: main.hex
-	$(AVRDUDE)
+flash:
+	$(FLASH)
+
+bootloader:
+	$(BOOTLOADER)
+
+iterate:    
+	make clean && make hex && make flash
 
 # rule for deleting dependent files (those which can be built by Make):
 clean:
@@ -142,11 +73,7 @@ clean:
 
 # file targets:
 
-# Since we don't want to ship the driver multipe times, we copy it into this project:
-usbdrv:
-	cp -r ../../../usbdrv .
-
-main.elf: usbdrv $(OBJECTS)	# usbdrv dependency only needed because we copy it
+main.elf: $(OBJECTS) # usbdrv dependency only needed because we copy it
 	$(COMPILE) -o main.elf $(OBJECTS)
 
 main.hex: main.elf
@@ -156,7 +83,7 @@ main.hex: main.elf
 
 # debugging targets:
 
-disasm:	main.elf
+disasm: main.elf
 	avr-objdump -d main.elf
 
 cpp:
