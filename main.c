@@ -106,6 +106,7 @@ int main(void)
     /*-----------------------------------------------------------------------*/
     I2C_Start();
     I2C_Write(write_address(0x4D));
+    //I2C_Write(write_address(0x48));  // Alternate MCP9800
     I2C_Write(0x01);
     I2C_Write((1<<7)|(1<<6)|(1<<5));
     I2C_Stop();
@@ -115,6 +116,7 @@ int main(void)
     /*-----------------------------------------------------------------------*/
     I2C_Start();
     I2C_Write(write_address(0x4D));
+    //I2C_Write(write_address(0x48));  // Alternate MCP9800
     I2C_Write(0x00);
     I2C_Stop();
     
@@ -126,6 +128,7 @@ int main(void)
         usbPoll();
         I2C_Start();
         debug[0] = I2C_Write(read_address(0x4D));
+        //debug[0] = I2C_Write(read_address(0x48));  // Alternate MCP9800
         tmpReadout[0] = I2C_Read(ACK);
         tmpReadout[1] = I2C_Read(NO_ACK);
         I2C_Stop();
@@ -142,6 +145,7 @@ int main(void)
         usbPoll();
         I2C_Start();
         I2C_Write(write_address(0x6A));
+        //I2C_Write(write_address(0x68));  // Alternate MCP9800
         I2C_Write((1<<7)|(1<<3)|(1<<2)|gainSetting);
         I2C_Stop();
 
@@ -160,6 +164,7 @@ int main(void)
         usbPoll();
         I2C_Start();
         I2C_Write(read_address(0x6A));
+        //I2C_Write(read_address(0x68));  // Alternate MCP9800
         tmpReadout[0] = I2C_Read(ACK);
         tmpReadout[1] = I2C_Read(ACK);
         tmpReadout[2] = I2C_Read(ACK);
