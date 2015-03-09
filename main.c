@@ -14,7 +14,7 @@
 #include "usbRelated.h"
 #include "bitbang_i2c.h"
 /*---------------------------------------------------------------------------*/
-#define VERSION 0x02
+#define VERSION 0x03
 /*---------------------------------------------------------------------------*/
 void timer_init();
 void initSerialNumber();
@@ -95,6 +95,13 @@ int main(void)
     uint8_t mcp9800_addr;
     uint8_t tmpReadout[4];
 
+    /* Variables for cold junction moving average filter */
+    int16_t movAvg_read;
+    int8_t movAvg_ind = 0;
+    int32_t movAvg_sum = 0;
+    uint8_t movAvg_stabil = 0;
+    int16_t movAvg_mem[8] = {0,0,0,0,0,0,0,0};    
+
     gainSetting = 0;
     timer0_counter = 0;
 
@@ -162,13 +169,33 @@ int main(void)
         I2C_Start();
         debug[0] = I2C_Write(read_address(mcp9800_addr));
         tmpReadout[0] = I2C_Read(ACK);
-        tmpReadout[1] = I2C_Read(NO_ACK);
+        tmpReadout[1] = I2C_Read(NO_ACK);        
         I2C_Stop();
 
+        movAvg_read = ((int16_t)tmpReadout[0] << 8) + ((int16_t)tmpReadout[1]);                
+        movAvg_sum -= movAvg_mem[movAvg_ind];
+        movAvg_sum += movAvg_read;        
+        movAvg_mem[movAvg_ind] = movAvg_read;
+        
+        if(movAvg_ind == 7)
+        {
+            movAvg_ind = 0;
+            movAvg_stabil = 1;
+        }
+        else
+        {
+            movAvg_ind++;
+        }
+
+        if(movAvg_stabil == 1)
+        {
+            movAvg_read = movAvg_sum >> 3;    
+        }        
+
         usbPoll();
-        cli();
-            coldJunctionReadout[0] = tmpReadout[0];            
-            coldJunctionReadout[1] = tmpReadout[1];        
+        cli();                                
+            coldJunctionReadout[0] = movAvg_read >> 8;            
+            coldJunctionReadout[1] = movAvg_read & 0xFF;          
         sei();
 
         /*-------------------------------------------------------------------*/
