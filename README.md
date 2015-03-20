@@ -18,3 +18,11 @@ For __OSX__, go to <https://github.com/micronucleus/micronucleus/tree/master/com
 For __Windows__, again download the binary from the link above and put that binary inside any of the global path folders.
 
 For __Linux__, there is no available binary release for micronucleus but you can download the source from <https://github.com/micronucleus/micronucleus/tree/master/commandline> and install the application by `make all` followed by `sudo make install`. You'll need to have `libusb` to compile the source.
+ 
+
+## T100 Projects
+
+- [Electronics](https://github.com/PaxInstruments/t100-electronics)
+- [Enclosure](https://github.com/PaxInstruments/t100-enclosure)
+- [Firmware](https://github.com/PaxInstruments/t100-firmware)
+- [Software](https://github.com/PaxInstruments/t100-software)
