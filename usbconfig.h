@@ -252,8 +252,8 @@ extern void usbEventResetReady(void);
  * the macros. See the file USB-IDs-for-free.txt before you assign a name if
  * you use a shared VID/PID.
  */
-#define USB_CFG_SERIAL_NUMBER   '5', '1' , '2' 
-#define USB_CFG_SERIAL_NUMBER_LEN   3
+#define USB_CFG_SERIAL_NUMBER   '4', '1', '2', '9', '9', '9', '9', '6', '7', '3'
+#define USB_CFG_SERIAL_NUMBER_LEN   10
 /* Same as above for the serial number. If you don't want a serial number,
  * undefine the macros.
  * It may be useful to provide the serial number through other means than at
@@ -345,7 +345,7 @@ extern void usbEventResetReady(void);
 #define USB_CFG_DESCR_PROPS_STRING_0                0
 #define USB_CFG_DESCR_PROPS_STRING_VENDOR           0
 #define USB_CFG_DESCR_PROPS_STRING_PRODUCT          0
-#define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    (USB_PROP_IS_RAM | (2 * USB_PROP_LENGTH(3)+2))
+#define USB_CFG_DESCR_PROPS_STRING_SERIAL_NUMBER    (USB_PROP_IS_RAM | (2 * USB_PROP_LENGTH(USB_CFG_SERIAL_NUMBER_LEN)+2))
 #define USB_CFG_DESCR_PROPS_HID                     0
 #define USB_CFG_DESCR_PROPS_HID_REPORT              0
 #define USB_CFG_DESCR_PROPS_UNKNOWN                 0

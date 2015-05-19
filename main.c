@@ -14,7 +14,7 @@
 #include "usbRelated.h"
 #include "bitbang_i2c.h"
 /*---------------------------------------------------------------------------*/
-#define VERSION 0x03
+#define VERSION 0x04
 /*---------------------------------------------------------------------------*/
 void timer_init();
 void initSerialNumber();
@@ -71,7 +71,14 @@ void handleMessage()
         {
             eeprom_write_byte((EE_addr+0),msgbuf[2]);
             eeprom_write_byte((EE_addr+1),msgbuf[3]);
-            eeprom_write_byte((EE_addr+2),msgbuf[4]);
+            eeprom_write_byte((EE_addr+2),msgbuf[4]);            
+            eeprom_write_byte((EE_addr+3),msgbuf[5]);
+            eeprom_write_byte((EE_addr+4),msgbuf[6]);
+            eeprom_write_byte((EE_addr+5),msgbuf[7]);
+            eeprom_write_byte((EE_addr+6),msgbuf[8]);
+            eeprom_write_byte((EE_addr+7),msgbuf[9]);
+            eeprom_write_byte((EE_addr+8),msgbuf[10]);
+            eeprom_write_byte((EE_addr+9),msgbuf[11]);            
             break;
         }
         case 4: /* Change PGA setting for MCP3421 */
@@ -261,36 +268,32 @@ ISR(TIMER0_OVF_vect,ISR_NOBLOCK)
 void initSerialNumber()
 {
     uint8_t eepromProblem = 0;  
+    uint8_t val[10];
+    uint8_t qw = 0;
 
-    char val1 = eeprom_read_byte(EE_addr+0);
-    char val2 = eeprom_read_byte(EE_addr+1);
-    char val3 = eeprom_read_byte(EE_addr+2);
+    for(qw=0;qw<10;qw++)
+    {
+        val[qw] = eeprom_read_byte(EE_addr+qw);
 
-    // ascii 48 -> '0' , 57 -> '9'
-
-    if((val1 < 48) || (val1 > 57))
-    {
-        eepromProblem = 1;
-    }
-    else if((val2 < 48) || (val2 > 57))
-    {
-        eepromProblem = 1;
-    }
-    else if((val3 < 48) || (val3 > 57))
-    {
-        eepromProblem = 1;
+        if((val[qw] < 48) || (val[qw] > 57))
+        {
+            eepromProblem = 1;
+        }
     }
 
     /* default serial number ... */
     if(eepromProblem != 0)
-    {
-        eeprom_write_byte((EE_addr+0),'5');
-        eeprom_write_byte((EE_addr+1),'1');
-        eeprom_write_byte((EE_addr+2),'2');
+    {        
+        for(qw=0;qw<10;qw++)
+        {
+            eeprom_write_byte((EE_addr+qw),'9');
+        }
     }
 
-    usbDescriptorStringSerialNumber[1] = eeprom_read_byte(EE_addr+0);
-    usbDescriptorStringSerialNumber[2] = eeprom_read_byte(EE_addr+1);
-    usbDescriptorStringSerialNumber[3] = eeprom_read_byte(EE_addr+2);
+    for(qw=0;qw<10;qw++)
+    {
+        usbDescriptorStringSerialNumber[qw+1] = eeprom_read_byte(EE_addr+qw);
+    }
+    
 }
 /*---------------------------------------------------------------------------*/
