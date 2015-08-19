@@ -246,8 +246,8 @@ extern void usbEventResetReady(void);
  * obdev's free shared VID/PID pair. See the file USB-IDs-for-free.txt for
  * details.
  */
-#define USB_CFG_DEVICE_NAME     'T','1','0','0'
-#define USB_CFG_DEVICE_NAME_LEN 4
+#define USB_CFG_DEVICE_NAME     'L','a','b','S','t','i','c','k','s',' ','T','e','m','p','e','r','a','t','u','r','e',' ','T','1','0','0'
+#define USB_CFG_DEVICE_NAME_LEN 26
 /* Same as above for the device name. If you don't want a device name, undefine
  * the macros. See the file USB-IDs-for-free.txt before you assign a name if
  * you use a shared VID/PID.
