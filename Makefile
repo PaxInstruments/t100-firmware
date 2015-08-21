@@ -13,9 +13,10 @@ DEVICE     = attiny85
 F_CPU      = 16500000   
 PROGRAMMER = usbtiny
 
-FLASH      = micronucleus main.hex
-BOOTLOADER = avrdude -c $(PROGRAMMER) -p t85 -U flash:w:bin/micronucleus-1.02.hex -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
-FUSE       = avrdude -c $(PROGRAMMER) -p t85 -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
+FLASH        = micronucleus main.hex
+BOOTL-JUMPER = avrdude -c $(PROGRAMMER) -p t85 -U flash:w:bin/micronucleus_t100_jumper.hex -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
+BOOTLOADER   = avrdude -c $(PROGRAMMER) -p t85 -U flash:w:bin/micronucleus-1.02.hex -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
+FUSE         = avrdude -c $(PROGRAMMER) -p t85 -U lfuse:w:0xe1:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m
 
 CFLAGS  = -Iusbdrv -I. -DDEBUG_LEVEL=0
 CFLAGS += -Wno-deprecated-declarations -D__PROG_TYPES_COMPAT__
@@ -28,12 +29,13 @@ COMPILE = avr-gcc -Wall -Os -DF_CPU=$(F_CPU) $(CFLAGS) -mmcu=$(DEVICE)
 # symbolic targets:
 help:
 	@echo "This Makefile has no default rule. Use one of the following:"
-	@echo "make hex ......... to build main.hex"
-	@echo "make fuse ........ to flash the fuses"
-	@echo "make flash ....... to flash the firmware using the micronucleus"
-	@echo "make clean ....... to delete objects and hex file"
-	@echo "make bootloader .. to flash the bootloader and fuses"
-	@echo "make iterate ..... [ make clean && make hex && make flash ]"
+	@echo "make hex ................ to build main.hex"
+	@echo "make fuse ............... to flash the fuses"
+	@echo "make flash .............. to flash the firmware using micronucleus"
+	@echo "make clean .............. to delete objects and hex file"
+	@echo "make bootloader ......... to flash the bootloader and fuses"
+	@echo "make bootloader-jumper .. to flash the jumper bootloader and fuses"
+	@echo "make iterate ............ [ make clean && make hex && make flash ]"
 
 hex: main.hex
 
@@ -47,6 +49,9 @@ flash:
 
 bootloader:
 	$(BOOTLOADER)
+
+bootloader-jumper:
+	$(BOOTL-JUMPER)
 
 iterate:    
 	make clean && make hex && make flash
